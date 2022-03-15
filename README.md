@@ -4,8 +4,6 @@
 
 To compile your code, just type:
 ```
-{
 $ make
-}
 ```
 
