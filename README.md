@@ -4,8 +4,9 @@
 
 To compile your code, just type:
 ```
-{
 $ make
-}
 ```
-
+To run the tests:
+```
+./test
+```
