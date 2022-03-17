@@ -83,16 +83,16 @@ UTEST(mtxio, write_1d_mtx)
     char command[50];
     sprintf(command, "diff -w %s %s ",filename_in, filename_out);
     int ret = system(command);
+    ASSERT_TRUE(ret==0);
     
     sprintf(command, "rm %s",filename_out);
-    system(command);
-    ASSERT_TRUE(ret==0);
-
+    ret = system(command);
+    (void)ret;
 }
 
 UTEST(linalg, det)
 {
-    system("python tests/python_linalg.py > tmp.txt");
+    int ret = system("python tests/python_linalg.py > tmp.txt");
     char filename_in[] = "A_test.mtx";
 
     
@@ -104,21 +104,25 @@ UTEST(linalg, det)
     FILE *det_file = fopen("tmp.txt","r");
     double det_A_sol;
 
-    fscanf(det_file,"%lf",&det_A_sol);
+    if (fscanf(det_file,"%lf",&det_A_sol) == -1)
+    {
+	printf("ERROR: failed to read determinant file\n");
+	exit(1);
+    }
+
     fclose(det_file);
   
     double diff = fabs((det_A - det_A_sol)/det_A_sol);
+    ASSERT_LT(diff, 10e-12);
 
-    system("rm tmp.txt A_test.mtx b_test.mtx x_test.mtx");
-    
-    ASSERT_LT(diff,
-	      10e-12);
+    ret = system("rm tmp.txt A_test.mtx b_test.mtx x_test.mtx");
+    (void)ret;
     
 }
 
 UTEST(linalg, solver)
 {
-    system("python tests/python_linalg.py > tmp.txt");
+    int ret = system("python tests/python_linalg.py > tmp.txt");
     char filename_in_A[] = "A_test.mtx";
     char filename_in_b[] = "b_test.mtx";
     char filename_in_x[] = "x_test.mtx";
@@ -144,7 +148,8 @@ UTEST(linalg, solver)
 
     ASSERT_LT(norm, 10e-6);
 
-    system("rm tmp.txt A_test.mtx b_test.mtx x_test.mtx");
+    ret = system("rm tmp.txt A_test.mtx b_test.mtx x_test.mtx");
+    (void)ret;
 }
 
 UTEST(main, usage)
@@ -163,14 +168,15 @@ UTEST(main, usage)
 
     ASSERT_EQ(out, 0);
 
-    system("rm tmp_1.txt tmp_2.txt");
+    int ret = system("rm tmp_1.txt tmp_2.txt");
+    (void)ret;
 
 }
 
 
 UTEST(main, solution)
 {
-    system("python tests/python_linalg.py > tmp_1.txt");
+    int ret = system("python tests/python_linalg.py > tmp_1.txt");
     int out = system("./solver A_test.mtx b_test.mtx "
 		     "x.mtx > tmp_2.txt");
 
@@ -188,14 +194,15 @@ UTEST(main, solution)
     
     ASSERT_LT(diff, 10e-12);
     
-    system("rm A_test.mtx b_test.mtx x_test.mtx "
-	   "tmp_1.txt tmp_2.txt x.mtx");
+    ret = system("rm A_test.mtx b_test.mtx x_test.mtx "
+		     "tmp_1.txt tmp_2.txt x.mtx");
+    (void)ret;
 }
 
 UTEST(main, output)
 {
 
-    system("python tests/python_linalg.py > tmp_1.txt");
+    int ret = system("python tests/python_linalg.py > tmp_1.txt");
     int out = system("./solver A_test.mtx b_test.mtx "
 		     "x_sol.mtx > tmp_2.txt");
 
@@ -205,12 +212,21 @@ UTEST(main, output)
     int mat_size;
     
     FILE *fp = fopen("tmp_2.txt","r");
-    fscanf(fp,"%*s %s %*s",mat_size_str);
+    if (fscanf(fp,"%*s %s %*s",mat_size_str) == -1)
+    {
+	printf("ERROR:  fscanf() failed to read file.\n");
+	exit(1);
+    }
 
     mat_size = atoi(mat_size_str);
     
     double time;
-    fscanf(fp,"%*s %lf %*s",&time);
+    if (fscanf(fp,"%*s %lf %*s",&time) == -1)
+    {
+	printf("ERROR:  fscanf() failed to read file.\n");
+	exit(1);
+	    
+    }
     fclose(fp);
     
     ASSERT_LT(time, 3);
@@ -222,10 +238,11 @@ UTEST(main, output)
     fclose(fout);
 
     out = system("diff -w tmp_2.txt tmp_3.txt");
-    system("rm A_test.mtx b_test.mtx x_test.mtx "
-	   "tmp_1.txt tmp_2.txt tmp_3.txt x_sol.mtx");
-    
     ASSERT_EQ(out, 0);
+
+    ret = system("rm A_test.mtx b_test.mtx x_test.mtx "
+		     "tmp_1.txt tmp_2.txt tmp_3.txt x_sol.mtx");
+    (void)ret;
 
 }
 

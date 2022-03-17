@@ -1141,7 +1141,7 @@ int utest_main(int argc, const char *const argv[]) {
       const utest_uint32_t state = seed;
       const utest_uint32_t word =
           ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
-      const utest_uint32_t next = ((word >> 22u) ^ word) % index;
+      const utest_uint32_t next = (utest_uint32_t)(((word >> 22u) ^ word) % index);
 
       // Swap the randomly chosen element into the last location.
       const struct utest_test_state_s copy = utest_state.tests[index - 1];
