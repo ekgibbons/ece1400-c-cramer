@@ -9,6 +9,9 @@ INCS = linalg.h mtxio.h
 
 all: solver test
 
+debug: CFLAGS += -DDEBUG -g
+debug: all
+
 $(EXEC): main.o $(OBJS)
 	$(CC) -o $@ $^ $(LIBS)
 
@@ -20,4 +23,4 @@ $(TEST): unittests.o $(OBJS)
 
 .PHONY: clean
 clean:
-	rm -f main.o unittests.o $(OBJS) $(EXEC) $(TEST) *.~ *.mtx
+	rm -f main.o unittests.o $(OBJS) $(EXEC) $(TEST) *.~ *.mtx *.dSYM
